@@ -30,17 +30,17 @@ namespace TrojanWebRebuild.Application.Categorization
         }
         private void loadDropdown()
         {
-            //try
-            //{
-            //    trojanDrpDown.DataSource = (from b in db.Virus where (b.userName == HttpContext.Current.User.Identity.Name) select b).ToList();
-            //    trojanDrpDown.DataValueField = "virusNickName";
-            //    trojanDrpDown.DataBind();
-            //}
-            //catch (Exception)
-            //{
-            //    //Do Nothing
-            //    trojanDrpDown.ClearSelection();
-            //}
+            try
+            {
+                trojanDrpDown.DataSource = (from b in db.Virus where (b.userName == HttpContext.Current.User.Identity.Name) select b).ToList();
+                trojanDrpDown.DataValueField = "virusNickName";
+                trojanDrpDown.DataBind();
+            }
+            catch (Exception)
+            {
+                //Do Nothing
+                trojanDrpDown.ClearSelection();
+            }
         }
 
         protected void trojanDrpDown_SelectedIndexChanged(object sender, EventArgs e)

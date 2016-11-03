@@ -81,22 +81,6 @@
             </a>
             <br />
         </div>
-        <div id="CategoryMenu" style="text-align: center">       
-            <asp:ListView ID="categoryList"  
-                ItemType="TrojanWebRebuild.Models.Category" 
-                runat="server"
-                SelectMethod="GetCategories" >
-                <ItemTemplate>
-                    <%--<b style="font-size: large; font-style: normal;">
-                        <a href="/AttributeList.aspx?id=<%#: Item.CategoryId %>">
-                        <%#: Item.CategoryName %>
-                        </a>
-                    </b>--%>
-                    <a class="btn btn-primary" style="box-shadow: 2px 2px 10px 2px black" href="/Application/Categorization/AttributeList.aspx?id=<%#: Item.CategoryId %>"><%#: Item.CategoryName %></a>
-                </ItemTemplate>
-               <%-- <ItemSeparatorTemplate>  |  </ItemSeparatorTemplate>--%>
-            </asp:ListView>
-        </div>
         <div class="container body-content">
             <asp:ContentPlaceHolder ID="MainContent" runat="server">
             </asp:ContentPlaceHolder>

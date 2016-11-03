@@ -649,8 +649,12 @@ namespace TrojanWebRebuild
             }
             Attributes = Attribute_Sorting(Attributes);
             hideResults();
+            if (categorySet.Contains("Chip Life Cycle") && categorySet.Contains("Abstraction") && categorySet.Contains("Properties") && categorySet.Contains("Location"))
+            {
+                explicitBuild(Attributes, virusId);
+            }
             //#1 Used for IAPL: 0010
-            if (!categorySet.Contains("Chip Life Cycle") && !categorySet.Contains("Abstraction") && categorySet.Contains("Properties") && !categorySet.Contains("Location"))
+            else if (!categorySet.Contains("Chip Life Cycle") && !categorySet.Contains("Abstraction") && categorySet.Contains("Properties") && !categorySet.Contains("Location"))
             {
                 propertiesOnly(Attributes, virusId);
             }
@@ -806,7 +810,60 @@ namespace TrojanWebRebuild
             List<Connection> SortedList = List.OrderBy(p => p.source).ThenBy(c => c.target).ToList();
             return SortedList;
         }
+        private void explicitBuild(List<TrojanWebRebuild.Models.Attribute> attributesList, string virusId)
+        {
+            List<int> locations = new List<int>();
+            List<int> insert = new List<int>();
+            List<int> abstraction = new List<int>();
+            List<int> properties = new List<int>();
 
+            foreach (TrojanWebRebuild.Models.Attribute A in attributesList)
+            {
+                if (A.CategoryName == "Location")
+                {
+                    locations.Add(A.AttributeId);
+                }
+                else if (A.CategoryName == "Abstraction")
+                {
+                    abstraction.Add(A.AttributeId);
+                }
+                else if (A.CategoryName == "Properties")
+                {
+                    properties.Add(A.AttributeId);
+                }
+                else
+                {
+                    insert.Add(A.AttributeId);
+                }
+            }
+            List<int> attr = new List<int>(), insertAbs = new List<int>();
+            insertAbs = insert.Concat(abstraction).ToList();
+            foreach(TrojanWebRebuild.Models.Attribute a in attributesList){
+                attr.Add(a.AttributeId);
+            }
+            List<Connection> Connections = new List<Connection>();
+            attr.Sort((a, b) => a.CompareTo(b));
+            int maxAttr = abstraction.Max();
+            foreach (int i in insertAbs)
+            {
+                for (int j = i; j <= maxAttr; ++j)
+                {
+                    if(doesForwardConnectionExist(i, j)){
+                        Connections.Add(new Connection(i, j, directConnectionForwards(i, j), virusId));
+                    }
+                }
+            }
+            attr = nodeFilter(attr, abstraction.Max(), Connections);
+            Connections = connectionFilter(attr, Connections);
+            saveToDB(attr, Connections, virusId);
+            Visualize(attr, Connections, virusId);
+            severity(attr);
+            //insert.Sort((a, b) => a.CompareTo(b)); //Ascending
+            //locations.Sort((a, b) => a.CompareTo(b)); //Ascending
+            //abstraction.Sort((a, b) => a.CompareTo(b)); //Ascending
+            //properties.Sort((a, b) => a.CompareTo(b)); //Ascending
+            
+        }
         private void propertiesOnly(List<TrojanWebRebuild.Models.Attribute> PropertiesList, string virusId)
         {
             List<int> propertyIDs = attrToInt(PropertiesList);
@@ -1046,6 +1103,17 @@ namespace TrojanWebRebuild
             }
             db.SaveChanges();
         }
+        //Gets a RowId and checks if it is connected to the col
+        private bool doesForwardConnectionExist(int rowId, int colId)
+        {
+            List<Matrix_Cell> conns = scanRowTrue(rowId, null);
+            foreach(Matrix_Cell conn in conns){
+                if(colId == conn.ColumnId){
+                    return true;
+                }
+            }
+            return false;
+        }
         //Determines if a rowId is a direct connection
         //to the current Matrix_Cell when doing backwards propagation 
         private bool directConnectionBackwards(Matrix_Cell X, int i)
@@ -1054,7 +1122,7 @@ namespace TrojanWebRebuild
             else return true;
         }
         //Determines if a colId is a direct connection
-        //to the current Matrix_Cell when doing backwards propagation 
+        //to the current Matrix_Cell when doing forwards propagation 
         private bool directConnectionForwards(Matrix_Cell X, int i)
         {
             if (Math.Abs(i - X.ColumnId) == 1) return false;

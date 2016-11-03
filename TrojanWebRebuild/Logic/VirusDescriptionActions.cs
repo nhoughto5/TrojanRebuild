@@ -32,7 +32,7 @@ namespace TrojanWebRebuild.Logic
                     VirusId = VirusDescriptionID,
                     Attribute = _db.Attributes.SingleOrDefault(
                      p => p.AttributeId == id),
-                    On_Off = false,
+                    On_Off = true,
                     DateCreated = DateTime.Now,
                     userAdded = true
                 };
